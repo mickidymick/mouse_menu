@@ -431,7 +431,7 @@ static void draw_popup(void) {
                                  buff);
 /*         on background */
         }else{
-            dd = yed_direct_draw(on_nothing_row + i - popup.frame->buffer_y_offset,
+            dd = yed_direct_draw(popup.frame->top + on_nothing_row + i - popup.frame->buffer_y_offset - 1,
                                  popup.frame->left + on_nothing_col + popup.frame->gutter_width - 1 - popup.frame->buffer_x_offset,
                                  i == popup.selection + 1 ? merged_inv : merged,
                                  buff);
@@ -445,8 +445,8 @@ static void draw_popup(void) {
         popup.bottom_row = popup.row + i - 1;
         popup.row_left   = popup.frame->left + popup.cursor_col + popup.frame->gutter_width - 1 - popup.frame->buffer_x_offset;
     }else{
-        popup.top_row    = on_nothing_row - popup.frame->buffer_y_offset;
-        popup.bottom_row = on_nothing_row + i - 1 - popup.frame->buffer_y_offset;
+        popup.top_row    = popup.frame->top + on_nothing_row - popup.frame->buffer_y_offset - 1;
+        popup.bottom_row = popup.frame->top + on_nothing_row + i - 1 - popup.frame->buffer_y_offset;
         popup.row_left   = popup.frame->left + on_nothing_col + popup.frame->gutter_width - popup.frame->buffer_x_offset;
         LOG_FN_ENTER();
         yed_log("on_nothing:%d", on_nothing_col);
