@@ -474,7 +474,7 @@ static int on_words(yed_event *event, yed_frame *frame) {
         return 0;
     }
     line = yed_buff_get_line(frame->buffer, row);
-    if((line->visual_width + 1) > col) {
+    if((line->visual_width + 1) >= col) {
         return 1;
     }else{
         return 0;
