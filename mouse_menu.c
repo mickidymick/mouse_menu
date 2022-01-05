@@ -69,6 +69,7 @@ int yed_plugin_boot(yed_plugin *self) {
 
     list_items = array_make(char *);
     yed_gui_init_list_menu(&list_menu, list_items);
+    list_menu.base.is_up = 0;
 
     return 0;
 }

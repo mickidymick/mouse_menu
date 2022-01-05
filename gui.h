@@ -140,7 +140,6 @@ static inline int _yed_gui_key_pressed_list_menu(yed_event *event, yed_gui_list_
             menu->selection = menu->max_size - 1;
         }
         yed_gui_draw(menu);
-
     }else if (event->key == ARROW_DOWN || event->key == TAB) {
         event->cancel = 1;
         if (menu->selection < menu->max_size - 1) {
@@ -150,7 +149,6 @@ static inline int _yed_gui_key_pressed_list_menu(yed_event *event, yed_gui_list_
         }
         yed_gui_draw(menu);
     }
-
     return 0;
 }
 
