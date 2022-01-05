@@ -15,11 +15,12 @@ static int               on_word;
 
 /* Internal Functions */
 static void _mouse_unload(yed_plugin *self);
-static void _run_command(yed_frame *frame);
+static void _run_command(void);
 static int  _on_words(yed_event *event);
 static void _right_click(yed_event *event);
 static void _right_click_handler(yed_event *event);
 static void _add_commands(array_t commands, char* string);
+static void _free_string_array(array_t *array);
 
 /* Event Handlers */
 static void _gui_key_handler(yed_event *event);
@@ -91,6 +92,7 @@ static void _right_click(yed_event* event) {
     int has_selection;
     char *item;
     array_t commands;
+    int row, col;
 
     list_menu.base.is_up = 1;
 
@@ -103,9 +105,7 @@ static void _right_click(yed_event* event) {
         has_selection = 0;
     }
 
-    while(array_len(list_items) > 0) {
-        array_pop(list_items);
-    }
+    _free_string_array(&list_items);
 
     if (!has_selection) {
         if (_on_words(event)) {
@@ -113,7 +113,6 @@ static void _right_click(yed_event* event) {
             commands = sh_split(yed_get_var("mouse-menu-on-word"));
             _add_commands(commands, "mouse-menu-on-word");
         }else {
-no_buff:;
             on_word = 0;
             commands = sh_split(yed_get_var("mouse-menu-on-nothing"));
             _add_commands(commands, "mouse-menu-on-nothing");
@@ -124,27 +123,39 @@ no_buff:;
         _add_commands(commands, "mouse-menu-on-selection");
     }
 
-    if(frame != NULL) {
+    row = 10;
+    col = 10;
+
+    if (frame != NULL) {
         yed_activate_frame(frame);
-        if(!has_selection && frame->buffer != NULL) {
-            yed_set_cursor_within_frame(frame, MOUSE_ROW(event->key) - frame->top + frame->buffer_y_offset + 1,
-                                                MOUSE_COL(event->key) - frame->left + frame->buffer_x_offset - frame->gutter_width + 1);
+        if(frame->buffer != NULL) {
+            if (!has_selection) {
+                row = MOUSE_ROW(event->key);
+                col = MOUSE_COL(event->key);
+                yed_set_cursor_within_frame(frame,
+                    MOUSE_ROW(event->key) - frame->top + frame->buffer_y_offset + 1,
+                    MOUSE_COL(event->key) - frame->left + frame->buffer_x_offset - frame->gutter_width + 1);
+            }else {
+                row = frame->cursor_line + frame->top - frame->buffer_y_offset - 1;
+                col = frame->cursor_col + frame->left - frame->buffer_x_offset + frame->gutter_width - 1;
+            }
+        }else {
+            row = MOUSE_ROW(event->key);
+            col = MOUSE_COL(event->key);
         }
+    }else {
+        row = MOUSE_ROW(event->key);
+        col = MOUSE_COL(event->key);
     }
+    _free_string_array(&commands);
 
-    while(array_len(list_items) > 0) {
-        array_pop(list_items);
+    if (list_menu.base.is_up) {
+        yed_delete_event_handler(h_mouse);
     }
-
-    item = strdup("First"); array_push(list_items, item);
-    item = strdup("Second"); array_push(list_items, item);
-    item = strdup("Third"); array_push(list_items, item);
-    item = strdup("Fourth"); array_push(list_items, item);
-
-    free_string_array(commands);
+    yed_gui_kill(&list_menu);
     yed_gui_init_list_menu(&list_menu, list_items);
-    list_menu.base.top  = MOUSE_ROW(event->key);
-    list_menu.base.left = MOUSE_COL(event->key);
+    list_menu.base.top  = row;
+    list_menu.base.left = col;
 
     yed_gui_draw(&list_menu);
     yed_plugin_add_event_handler(Self, h_mouse);
@@ -170,12 +181,20 @@ static void _gui_key_handler(yed_event *event) {
     int ret = 0;
     ret = yed_gui_key_pressed(event, &list_menu);
     if (ret) {
+        _run_command();
+    }
+
+    if (!list_menu.base.is_up) {
         yed_delete_event_handler(h_mouse);
     }
 }
 
 static void _gui_mouse_handler(yed_event *event) {
     yed_gui_mouse_pressed(event, &list_menu);
+
+    if (!list_menu.base.is_up) {
+        yed_delete_event_handler(h_mouse);
+    }
 }
 
 static void _mouse_unload(yed_plugin *self) {
@@ -206,10 +225,13 @@ static int _on_words(yed_event *event) {
     }
 }
 
-static void _run_command(yed_frame *frame) {
+static void _run_command(void) {
     array_t commands, tmp_split;
+    yed_frame *frame;
 
-    if(frame->buffer == NULL) {
+    frame = ys->active_frame;
+
+    if(frame == NULL || frame->buffer == NULL) {
         goto no_buffer_1;
     }
 
@@ -223,8 +245,16 @@ no_buffer_1:;
     }else{
         commands = sh_split(yed_get_var("mouse-menu-on-selection"));
     }
-    //tmp_split = sh_split(*(char **)array_item(commands, (popup.selection*2)+1));
+    tmp_split = sh_split(*(char **)array_item(commands, (list_menu.selection*2)+1));
     yed_execute_command_from_split(tmp_split);
-    free_string_array(tmp_split);
-    free_string_array(commands);
+
+    _free_string_array(&tmp_split);
+    _free_string_array(&commands);
+}
+
+static void _free_string_array(array_t *array) {
+    while(array_len(*array) > 0) {
+        free(*(char **)array_last(*array));
+        array_pop(*array);
+    }
 }

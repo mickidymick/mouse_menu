@@ -40,6 +40,8 @@ static inline void       yed_gui_update(void *base);
 
 /* Initilization Functions */
 static inline void yed_gui_init_list_menu(yed_gui_list_menu *menu, array_t strings) {
+    memset(menu, 0, sizeof(*menu));
+
     yed_gui_kill(menu);
 
     menu->base.kind         =  LIST_MENU;
@@ -117,10 +119,6 @@ static inline void _yed_gui_draw_list_menu(yed_gui_list_menu *menu) {
 
 /* Specialized Key Pressed Functions */
 static inline int _yed_gui_key_pressed_list_menu(yed_event *event, yed_gui_list_menu *menu) {
-    yed_line  *line;
-    int        word_len;
-    int        word_start;
-
     if (ys->interactive_command != NULL) { return 0; }
 
     if (!menu->base.is_up) { return 0; }
@@ -175,33 +173,27 @@ static inline void _yed_gui_mouse_pressed_list_menu(yed_event *event, yed_gui_li
                     }
                 event->cancel = 1;
             }
-        }else if (MOUSE_KIND(event->key) == MOUSE_WHEEL_UP) {
-            LOG_FN_ENTER();
-            yed_log("up");
-            LOG_EXIT();
-            if (menu->selection > 0) {
-                menu->selection -= 1;
-            }else {
-                menu->selection = menu->max_size - 1;
+        }else if (MOUSE_KIND(event->key) == MOUSE_PRESS) {
+            if (MOUSE_BUTTON(event->key) == MOUSE_WHEEL_UP) {
+                if (menu->selection > 0) {
+                    menu->selection -= 1;
+                }else {
+                    menu->selection = menu->max_size - 1;
+                }
+                yed_gui_draw(menu);
+                event->cancel = 1;
+            }else if (MOUSE_BUTTON(event->key) == MOUSE_WHEEL_DOWN) {
+                if (menu->selection < menu->max_size - 1) {
+                    menu->selection += 1;
+                }else {
+                    menu->selection = 0;
+                }
+                yed_gui_draw(menu);
+                event->cancel = 1;
+            }else if (MOUSE_KIND(event->key) == MOUSE_BUTTON_LEFT) {
+                event->cancel = 1;
             }
-            yed_gui_draw(menu);
-            event->cancel = 1;
-        }else if (MOUSE_KIND(event->key) == MOUSE_WHEEL_DOWN) {
-            LOG_FN_ENTER();
-            yed_log("down");
-            LOG_EXIT();
-            if (menu->selection < menu->max_size - 1) {
-                menu->selection += 1;
-            }else {
-                menu->selection = 0;
-            }
-            yed_gui_draw(menu);
-            event->cancel = 1;
         }
-/*         LOG_FN_ENTER(); */
-/*         yed_log(" top:%d row:%d bottom:%d\n", menu->base.top+1,  MOUSE_ROW(event->key), menu->base.top + menu->max_size); */
-/*         yed_log("left:%d col:%d  right:%d\n", menu->base.left-1, MOUSE_COL(event->key), menu->base.left + menu->max_width); */
-/*         LOG_EXIT(); */
     }
 }
 
@@ -211,7 +203,11 @@ static inline void _yed_gui_kill_list_menu(yed_gui_list_menu *menu) {
 
     if (!menu->base.is_up) { return; }
 
-    free_string_array(menu->strings);
+
+    while(array_len(menu->strings) > 0) {
+        free(*(char **)array_last(menu->strings));
+        array_pop(menu->strings);
+    }
 
     array_traverse(menu->base.dds, dd) {
         yed_kill_direct_draw(*dd);
@@ -280,6 +276,8 @@ static inline void yed_gui_update(void *base) {
 /* Global Helper Functions */
 static inline yed_frame *yed_gui_find_frame(yed_event* event) {
     yed_frame **frame_it;
+
+    if(ys->active_frame == NULL) {return NULL;}
 
     if (yed_cell_is_in_frame(MOUSE_ROW(event->key), MOUSE_COL(event->key), ys->active_frame)) {
         return ys->active_frame;
