@@ -4,7 +4,6 @@
 static yed_plugin       *Self;
 static yed_event_handler h_key;
 static yed_event_handler h_mouse;
-static yed_event_handler p_update;
 static yed_event_handler h_right_click;
 static array_t           list_items;
 static yed_gui_list_menu list_menu;
@@ -25,7 +24,6 @@ static void _free_string_array(array_t *array);
 /* Event Handlers */
 static void _gui_key_handler(yed_event *event);
 static void _gui_mouse_handler(yed_event *event);
-static void _gui_update_handler(yed_event* event);
 
 int yed_plugin_boot(yed_plugin *self) {
     yed_plugin_request_mouse_reporting(self);
@@ -41,11 +39,6 @@ int yed_plugin_boot(yed_plugin *self) {
 /*     event_handler for mouse interaction */
     h_mouse.kind = EVENT_KEY_PRESSED;
     h_mouse.fn   = _gui_mouse_handler;
-
-/*     event handler for updating list menu */
-    p_update.kind = EVENT_FRAME_PRE_UPDATE;
-    p_update.fn   = _gui_update_handler;
-    yed_plugin_add_event_handler(self, p_update);
 
 /*     event_handler for right click */
     h_right_click.kind = EVENT_KEY_PRESSED;
@@ -172,10 +165,6 @@ static void _right_click_handler(yed_event *event) {
             _right_click(event);
         }
     }
-}
-
-static void _gui_update_handler(yed_event *event) {
-    yed_gui_update(&list_menu);
 }
 
 static void _gui_key_handler(yed_event *event) {
