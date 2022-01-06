@@ -129,17 +129,8 @@ static void _right_click(yed_event* event) {
                 yed_set_cursor_within_frame(frame,
                     MOUSE_ROW(event->key) - frame->top + frame->buffer_y_offset + 1,
                     MOUSE_COL(event->key) - frame->left + frame->buffer_x_offset - frame->gutter_width + 1);
-            }else {
-                row = frame->cursor_line + frame->top - frame->buffer_y_offset - 1;
-                col = frame->cursor_col + frame->left - frame->buffer_x_offset + frame->gutter_width - 1;
             }
-        }else {
-            row = MOUSE_ROW(event->key);
-            col = MOUSE_COL(event->key);
         }
-    }else {
-        row = MOUSE_ROW(event->key);
-        col = MOUSE_COL(event->key);
     }
     _free_string_array(&commands);
 
@@ -148,8 +139,8 @@ static void _right_click(yed_event* event) {
     }
     yed_gui_kill(&list_menu);
     yed_gui_init_list_menu(&list_menu, list_items);
-    list_menu.base.top  = row;
-    list_menu.base.left = col;
+    list_menu.base.top  = frame->cur_y;
+    list_menu.base.left = frame->cur_x;
 
     yed_gui_draw(&list_menu);
     yed_plugin_add_event_handler(Self, h_mouse);
