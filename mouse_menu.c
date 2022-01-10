@@ -51,11 +51,11 @@ int yed_plugin_boot(yed_plugin *self) {
     }
 
     if (yed_get_var("mouse-menu-on-selection") == NULL) {
-        yed_set_var("mouse-menu-on-selection", "Copy yank-selection");
+        yed_set_var("mouse-menu-on-selection", "Copy yank-selection Delete delete-back");
     }
 
     if (yed_get_var("mouse-menu-on-nothing") == NULL) {
-        yed_set_var("mouse-menu-on-nothing", "'Frame New' frame-new 'Frame Delete' frame-delete 'Frame Next' frame-next");
+        yed_set_var("mouse-menu-on-nothing", "'Frame New' frame-new 'Frame Delete' frame-delete 'Frame Next' frame-next Quit quit");
     }
 
     yed_plugin_set_unload_fn(self, _mouse_unload);
