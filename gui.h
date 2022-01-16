@@ -103,6 +103,15 @@ static inline void _yed_gui_draw_list_menu(yed_gui_list_menu *menu) {
     }
     menu->max_width = width;
 
+/*     fix_bounds */
+    if ((menu->base.top + array_len(menu->strings)) > (ys->term_rows - 2)) {
+        menu->base.top = ys->term_rows - array_len(menu->strings) - 2;
+    }
+
+    if ((menu->base.left + yed_gui_find_width(menu->strings)) > ys->term_cols) {
+        menu->base.left = ys->term_cols - yed_gui_find_width(menu->strings);
+    }
+
     i = 1;
     array_traverse(menu->strings, it) {
         snprintf(buff, sizeof(buff), " %*s ", -menu->max_width, *it);
