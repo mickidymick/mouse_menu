@@ -1,5 +1,5 @@
 #include <yed/plugin.h>
-#include "gui.h"
+#include <yed/gui.h>
 
 static yed_plugin       *Self;
 static yed_event_handler h_key;
