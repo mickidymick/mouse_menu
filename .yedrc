@@ -1,0 +1,5 @@
+set builder-build-command './build.sh'
+plugins-add-dir           '~/tmp_yed/completed_plugins/mouse_menu'
+plugin-unload             'ypm/plugins/mouse_menu'
+plugin-load               'mouse_menu'
+yedrc-load                'my_yed_layout.yedrc'
