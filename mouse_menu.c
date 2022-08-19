@@ -193,6 +193,15 @@ static void _gui_mouse_handler(yed_event *event) {
 }
 
 static void _mouse_unload(yed_plugin *self) {
+    char **c_it;
+
+    if (array_len(list_items) > 0) {
+        array_traverse(list_items, c_it) {
+            free(*c_it);
+        }
+    }
+
+    array_free(list_items);
 }
 
 static int _on_words(yed_event *event) {
