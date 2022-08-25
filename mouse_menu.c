@@ -1,16 +1,16 @@
 #include <yed/plugin.h>
 #include <yed/gui.h>
 
-static yed_plugin       *Self;
-static yed_event_handler h_key;
-static yed_event_handler h_mouse;
-static yed_event_handler h_right_click;
-static array_t           list_items;
-static yed_gui_list_menu list_menu;
+static yed_plugin        *Self;
+static yed_event_handler  h_key;
+static yed_event_handler  h_mouse;
+static yed_event_handler  h_right_click;
+static array_t            list_items;
+static yed_gui_list_menu  list_menu;
 
-static int               if_dragging;
-static yed_frame        *drag_frame;
-static int               on_word;
+static int                if_dragging;
+static yed_frame         *drag_frame;
+static int                on_word;
 
 /* Internal Functions */
 static void _mouse_unload(yed_plugin *self);
@@ -127,7 +127,8 @@ static void _right_click(yed_event* event) {
                 yed_set_cursor_within_frame(frame,
                     MOUSE_ROW(event->key) - frame->top + frame->buffer_y_offset + 1,
                     MOUSE_COL(event->key) - frame->left + frame->buffer_x_offset - frame->gutter_width + 1);
-                row = frame->cur_y;
+/*                 row = frame->cur_y; */
+                row = MOUSE_ROW(event->key);
                 col = MOUSE_COL(event->key);
             }else{
                 row = frame->cur_y;
